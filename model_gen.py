@@ -5,6 +5,12 @@ Copyright 2024 Kazuma Ikesaka.
 All rights reserved.
 """
 
+import random
+import sys
+from time import sleep
+
+sys.setrecursionlimit(10000)
+
 config = {
         "node_type":{
             "action":1,
@@ -52,7 +58,7 @@ class node :
         self.next_node2 = None
         self.depth = 1
         self.select = select()
-        
+
     def __str__(self):
         tab = ""
         for i in range(self.depth-1):
