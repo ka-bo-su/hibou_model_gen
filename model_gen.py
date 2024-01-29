@@ -8,20 +8,23 @@ All rights reserved.
 import random
 import sys
 from time import sleep
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 sys.setrecursionlimit(10000)
 
 config = {
         "node_type":{
             "action":1,
-            "bin_operation":5,
-            "un_operation":1
+            "bin_operation":9,
+            "un_operation":0
         },
         "bin_operation":{
-            "seq":10,
-            "struct":10,
-            "par":1,
-            "alt":1
+            "seq":0,
+            "strict":1,
+            "par":0,
+            "alt":0
         },
         "un_operation":{
             "loopS":1
@@ -38,7 +41,7 @@ config = {
         }
     }
 
-BIN_OPERATION = ["seq", "struct", "par", "alt"]
+BIN_OPERATION = ["seq", "strict", "par", "alt"]
 UN_OPERATION = ["loopS"]
 
 life_line = ["l1","l2","l3"]
@@ -62,8 +65,7 @@ class node :
     def __str__(self):
         tab = ""
         for i in range(self.depth-1):
-            tab += "  "
-        tab_ = tab + "  "
+            tab += "    "
         
         if self.is_action:
             return tab + self.action
@@ -96,10 +98,10 @@ class node :
             node_info_lifeline = select.life_line(self)
             node_info_message = select.message(self)
             if (random.randint(0, 1) == 0):
-                node_info = node_info_lifeline + "!" + node_info_message
+                node_info = node_info_lifeline + " -- " + node_info_message + " -> |"
                 self.add_node(node_type, node_info)
             else:
-                node_info = node_info_lifeline + "?" + node_info_message
+                node_info = node_info_message + " -> " + node_info_lifeline
                 self.add_node(node_type, node_info)
         elif node_type == "bin_operation":
             node_info = select.bin_operation(self)
@@ -138,16 +140,16 @@ class select:
         
     def bin_operation(self):
         tmp_seq = config["bin_operation"]["seq"]
-        tmp_struct = config["bin_operation"]["struct"]
+        tmp_strict = config["bin_operation"]["strict"]
         tmp_par = config["bin_operation"]["par"]
         tmp_alt = config["bin_operation"]["alt"]
-        tmp = tmp_seq + tmp_struct + tmp_par + tmp_alt
+        tmp = tmp_seq + tmp_strict + tmp_par + tmp_alt
         random_number = random.randint(1,tmp)
         if random_number <= tmp_seq:
             return "seq"
-        elif random_number <= tmp_seq + tmp_struct:
-            return "struct"
-        elif random_number <= tmp_seq + tmp_struct + tmp_par:
+        elif random_number <= tmp_seq + tmp_strict:
+            return "strict"
+        elif random_number <= tmp_seq + tmp_strict + tmp_par:
             return "par"
         else:
             return "alt"
