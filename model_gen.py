@@ -52,8 +52,66 @@ class node :
         self.next_node2 = None
         self.depth = 1
         self.select = select()
-
         
+    def __str__(self):
+        tab = ""
+        for i in range(self.depth-1):
+            tab += "  "
+        tab_ = tab + "  "
+        
+        if self.is_action:
+            return tab + self.action
+        elif self.is_bin_operation:
+            return tab +self.bin_operation + "(\n" + tab +str(self.next_node1)+ ",\n" + tab + str(self.next_node2) + "\n" + tab +")"
+        elif self.is_un_operation:
+            return tab +self.un_operation + "(\n" + tab +str(self.next_node1) + "\n" + tab +")"
+
+    def add_node(self, node_type, node_info):
+        if node_type == "action":
+            self.is_action = True
+            self.action = node_info
+        elif node_type == "bin_operation":
+            self.is_bin_operation = True
+            self.bin_operation = node_info
+            self.next_node1 = node()
+            self.next_node1.depth = self.depth + 1
+            self.next_node2 = node()
+            self.next_node2.depth = self.depth + 1
+        elif node_type == "un_operation":
+            self.is_un_operation = True
+            self.un_operation = node_info
+            self.next_node1 = node()
+            self.next_node1.depth = self.depth + 1
+
+    def add_random_node(self, max_depth):
+        node_type = select.node_type(self)
+        if node_type == "action" or max_depth == self.depth:
+            node_type = "action"
+            node_info_lifeline = select.life_line(self)
+            node_info_message = select.message(self)
+            if (random.randint(0, 1) == 0):
+                node_info = node_info_lifeline + "!" + node_info_message
+                self.add_node(node_type, node_info)
+            else:
+                node_info = node_info_lifeline + "?" + node_info_message
+                self.add_node(node_type, node_info)
+        elif node_type == "bin_operation":
+            node_info = select.bin_operation(self)
+            self.add_node(node_type, node_info)
+            self.next_node1.add_random_node(max_depth - 1)
+            self.next_node2.add_random_node(max_depth - 1)
+        elif node_type == "un_operation":
+            node_info = select.un_operation(self)
+            self.add_node(node_type, node_info)
+            self.next_node1.add_random_node(max_depth - 1)
+
+    def gen_random_tree(self, max_depth):
+        if max_depth == 0:
+            print("max_depth is 0")
+            return None
+        else:
+            self.add_random_node(max_depth)
+
 class select:
     def __init__(self):
         global config
