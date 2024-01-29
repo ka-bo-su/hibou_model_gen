@@ -184,3 +184,11 @@ class select:
             return "m2"
         else:
             return "m3"
+
+def main():
+    nodeA = node()
+    nodeA.gen_random_tree(depth)  
+    print(nodeA)
+
+if __name__ == "__main__":
+    main()
