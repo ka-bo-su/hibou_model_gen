@@ -70,7 +70,7 @@ class node :
         if self.is_action:
             return tab + self.action
         elif self.is_bin_operation:
-            return tab +self.bin_operation + "(\n" + tab +str(self.next_node1)+ ",\n" + tab + str(self.next_node2) + "\n" + tab +")"
+            return tab +self.bin_operation + "(\n" +str(self.next_node1)+ ",\n" + str(self.next_node2) + "\n" + tab +")"
         elif self.is_un_operation:
             return tab +self.un_operation + "(\n" + tab +str(self.next_node1) + "\n" + tab +")"
 
@@ -189,8 +189,9 @@ class select:
 
 def gen_random_hif():
     nodeA = node()
-    nodeA.gen_random_tree(depth)  
-    print(nodeA)
+    nodeA.gen_random_tree(depth)
+    f = open('hibou_para.hif', 'w',encoding='UTF-8')
+    f.write(nodeA.__str__())
 
 if __name__ == "__main__":
     gen_random_hif()
