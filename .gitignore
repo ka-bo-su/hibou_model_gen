@@ -1,3 +1,4 @@
 .vscode/
-hibou_para*
+hibou_para
 tracegen*/*
+output/*
