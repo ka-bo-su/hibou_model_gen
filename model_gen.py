@@ -187,10 +187,10 @@ class select:
         else:
             return "m3"
 
-def main():
+def gen_random_hif():
     nodeA = node()
     nodeA.gen_random_tree(depth)  
     print(nodeA)
 
 if __name__ == "__main__":
-    main()
+    gen_random_hif()
