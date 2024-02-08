@@ -16,12 +16,12 @@ sys.setrecursionlimit(10000)
 
 config = {
         "node_type":{
-            "action":1,
-            "bin_operation":9,
+            "action":4,
+            "bin_operation":10,
             "un_operation":0
         },
         "bin_operation":{
-            "seq":0,
+            "seq":1,
             "strict":1,
             "par":0,
             "alt":0
