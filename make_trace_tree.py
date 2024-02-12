@@ -182,16 +182,6 @@ class tree :
         return traces_tmp
 
 
-    def make_tree_from_exist_traces(self):
-        graph_image_name = "sample_seq"
-        self.traces.sort()
-        # for i in range(len(self.traces)):
-        #     self.add_trace_to_tree(self.traces[i])
-        G = Digraph(format='png')
-        trace_tree.add_node_fig(G, "0", graph_image_name)
-        return trace_tree
-
-
 def marge_trace(traces): #すべてのトレースは同じ長さと想定
     tmp = []
     tmp2 = []

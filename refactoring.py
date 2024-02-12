@@ -64,11 +64,17 @@ class node :
 
     def get_node_info(self):
         tmp = []
-        if self.is_operation:
-            for i in range(1, len(self.info)):
-                tmp.extend(self.info[i].get_node_info())
+        if self.is_operation and len(self.info) > 2:
+            if self.info[2].is_operation == True:
+                for i in range(1, len(self.info)):
+                    tmp.extend(self.info[i].get_node_info())
+            else:
+                for i in range(1, len(self.info)):
+                    tmp.extend(self.info[i].info)
             return tmp
-        return tmp.extend(self.info)
+        else:
+            tmp.extend(self.info)
+            return tmp
     
     def add_node(self, node):
         self.info.append(node)
@@ -95,6 +101,7 @@ class tree :
         self.depth = 0
         self.traces = []
         self.multi_traces = {}
+        self.parent = None
 
     def __str__(self):
         string = ""
@@ -106,6 +113,7 @@ class tree :
     def add_trace_to_tree(self, trace):
         if len(trace) == 0:
             child = tree()
+            child.parent = self
             child.depth = self.depth + 1
             child.node.add_node("leaf")
             self.child.append(child)
@@ -118,6 +126,7 @@ class tree :
                     child.add_trace_to_tree(trace[1:])
                     return
             child = tree()
+            child.parent = self
             child.depth = self.depth + 1
             child.node = trace[0]
             child.add_trace_to_tree(trace[1:])
@@ -151,6 +160,18 @@ class tree :
                         nodes.extend(child.get_n_th_child_node(n))
         return nodes
     
+    def get_n_th_child_tree_with_branch(self, n):
+        if self.depth == n and len(self.child) > 1:
+            ans = self
+        elif len(self.child) == 0:
+            ans = "This is leaf"
+        else:
+            for child in self.child:
+                ans = child.get_n_th_child_tree_with_branch(n)
+                if ans != None and ans != "This is leaf":
+                    break
+        return ans
+    
     def get_count_of_child(self):
         cnt_list = []
         depth = 1
@@ -169,43 +190,21 @@ class tree :
             for trace in self.traces:
                 length_list.append(len(trace))
         return length_list
+    
+    def find_deepest_branch(self):
+        cnt_child_list = self.get_count_of_child()
+        max_depth = max(cnt_child_list)
+        for i in range(len(cnt_child_list)):
+            if cnt_child_list[i] == max_depth:
+                depth = i - 2
+        deepest_branch = self.get_n_th_child_tree_with_branch(depth)
+        return deepest_branch
+    
+    ###TODO###
+    # 1. こいつを深さ分繰り返せばいいはず。
+    def replace_merged_tree(self, merged_trace):
+        print("merged_trace")
 
-
-def marge_trace(traces): #すべてのトレースは同じ長さと想定
-    traces_len = []
-    for trace in traces:
-        traces_len.append(len(trace))
-
-    for i in range(min(traces_len)):
-        if i == 0:
-            tmp = traces[0][i]        
-        for trace in traces:
-            if tmp != trace[i]:
-                branch_depth = i
-                break
-    traces_branch = []
-    for trace in traces:
-        traces_branch.append(trace[branch_depth-1:])
-
-    traces_content = []
-    for i in range(len(traces)):
-        tmp = []
-        for j in range(traces_len[i]-branch_depth):
-            tmp.extend(traces[i][j+branch_depth].get_node_info())
-        tmp.sort()
-        traces_content.append(tmp)
-
-    for i in range(len(traces_content)):
-        if i == 0:
-            tmp = traces_content[i]
-        if tmp != traces_content[i]:
-            print("error")
-            exit()
-    tmp = tmp[branch_depth-1:branch_depth-1+len(branch_depth)]
-    tmp.sort()
-    merged_node = node()
-    merged_node.add_operation("seq", tmp)
-    return traces[0][:branch_depth-1].append(merged_node)
 
 def load_traces(dir_path=DEFORLT_DIR_PATH):
     traces = []
@@ -245,7 +244,6 @@ def add_order_label_to_traces(global_traces, multi_traces):
         for i in range(len(trace)):
             action_split = re.split("[?!]", trace[i])
             key_count[action_split[0]] += 1
-            # trace[i] = f"{key_count[action_split[0]]}_{trace[i]}"
             if "!" in trace[i]:
                 trace[i] = f"{action_split[0]}_{key_count[action_split[0]]}!{action_split[1]}"
             elif "?" in trace[i]:
@@ -281,9 +279,56 @@ def make_tree_from_traces(traces):
     trace_tree_inv.add_node_fig(Digraph(format='png'), "0", graph_image_name + "_inv")
     return trace_tree
 
+def marge_trace(branch_tree):
+    branch_traces = branch_tree.traces
+    traces = branch_traces
+    traces_content = []
+    for trace in traces:
+        trace_content = []
+        for node_ in trace:
+            trace_content.append(node_)
+            trace_content.sort()
+        traces_content.append(trace_content)
+    for i in range(len(traces_content)):
+        if i == 0:
+            tmp = traces_content[i]
+        if tmp != traces_content[i]:
+            print("error")
+            exit()
+    tmp = []
+    for i in range(len(traces)):
+        tmp.append(traces[0][i])
+    merged_node = node()
+    merged_node.add_operation("seq", tmp)
+    ans = []
+    ans.append(merged_node)
+    for i in range(len(traces),len(traces[0])):
+        ans.append(traces[0][i])
+    return ans
+
 def main():
     traces = setup_traces_from_file()
     trace_tree = make_tree_from_traces(traces)
-
+    cnt_child_list = trace_tree.get_count_of_child()
+    nodes = trace_tree.get_n_th_child_node(1)
+    merge_branch = trace_tree.find_deepest_branch()
+    merged_trace = marge_trace(merge_branch)
+    # trace_tree.replace_merged_tree(merged_trace)
+    print("----------------------")
+    for trace in trace_tree.child[0].child[0].traces:
+        for node in trace:
+            print(node.get_node_info(),end="")
+        print()
+    print("----------------------")
+    print(merge_branch.node.get_node_info())
+    print("----------------------")
+    for node in merged_trace:
+        print(node.get_node_info(),end="")
+        print()
+    print("----------------------")
+    for trace in trace_tree.traces:
+        for node in trace:
+            print(node.get_node_info(),end="")
+        print() 
 if __name__ == "__main__":
     main()
